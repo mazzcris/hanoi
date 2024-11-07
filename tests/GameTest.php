@@ -91,4 +91,16 @@ class GameTest extends TestCase
 
         $game->move(1, 3);
     }
+
+    #[Test]
+    public function testMoveToEmptyTower()
+    {
+        $game = new Game();
+        $game->setState([[2, 3], [1, 4, 5, 6, 7], []]);
+
+        $game->move(1, 3);
+
+        $this->assertEquals([[3], [1, 4, 5, 6, 7], [2]], $game->getState());
+
+    }
 }

@@ -42,6 +42,7 @@ class Game
 
     public function move(int $from, int $to): void
     {
+
         $towers = $this->getState();
 
         $fromTower = $towers[$from - 1];
@@ -51,7 +52,7 @@ class Game
             throw new \LogicException('No discs to move from tower ' . $from);
         }
 
-        if ($fromTower[0] > $toTower[0]) {
+        if (isset($toTower[0]) && $fromTower[0] > $toTower[0]) {
             throw new \LogicException('Cannot move from tower ' . $from . ' to tower ' . $to);
         }
 

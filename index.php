@@ -2,56 +2,47 @@
 
 use Hanoi\Game;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
+
+session_start();
 
 $game = new Game();
 
-printTowers($game->getState());
+if (isset($_SESSION['game'])) {
+    $game->setState($_SESSION['game']);
+} else {
+    echo "Starting a new game" . PHP_EOL;
 
+    $_SESSION['game'] = $game->getState();
+}
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-header('Content-Type: application/json');
-
 if ($method === 'GET' && $uri === '/state') {
-    echo json_encode($game->getState());
+    $game->printTowers();
+
+    if($game->checkWin()){
+        echo PHP_EOL;
+        echo '##### YOU WON #####';
+        echo PHP_EOL;
+    }
+
     exit;
 }
 
 if ($method === 'POST' && preg_match('#^/move/(\d+)/(\d+)$#', $uri, $matches)) {
     [$fullMatch, $from, $to] = $matches;
-    $from = (int) $from;
-    $to = (int) $to;
 
-    $success = $game->move($from, $to);
-    echo json_encode([
-        'success' => $success,
-        'state' => $game->getState()
-    ]);
+    $from = (int)$from;
+    $to = (int)$to;
+
+    $game->move($from, $to);
+    $game->printTowers();
+
+    $_SESSION['game'] = $game->getState();
+
     exit;
 }
 
-http_response_code(404);
-echo json_encode(['error' => 'Not found']);
-
-
-function printTowers(array $towers)
-{
-    $towers = array_map(function (array $tower) {
-        return array_pad($tower, -7, 0);
-    }, $towers);
-
-    $lines = array_map(null, ...$towers);
-
-    foreach ($lines as $line) {
-        foreach ($line as $diskSize) {
-            $string = $diskSize == 0 ? '|' : str_repeat('=', $diskSize);
-
-            echo str_pad($string, 20, " ", STR_PAD_BOTH);
-        }
-
-        echo PHP_EOL;
-    }
-}
-
+echo "Not found";
