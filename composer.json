@@ -7,5 +7,10 @@
         "psr-4": {
             "Hanoi\\": "src/"
         }
+    },
+    "require": {
+        "symfony/http-foundation": "^7.1",
+        "symfony/routing": "^7.1",
+        "symfony/http-kernel": "^7.1"
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Hanoi;
 
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
 class Game
 {
     private array $tower1 = [];
@@ -62,7 +64,7 @@ class Game
         $this->setState([$towers[0], $towers[1], $towers[2]]);
     }
 
-    public function printTowers(): void
+    public function printTowers(): string
     {
         $towers = array_map(function (array $tower) {
             return array_pad($tower, -7, 0);
@@ -70,14 +72,33 @@ class Game
 
         $lines = array_map(null, ...$towers);
 
+        $output = PHP_EOL;
+
         foreach ($lines as $line) {
             foreach ($line as $diskSize) {
                 $string = $diskSize == 0 ? '|' : str_repeat('=', $diskSize);
 
-                echo str_pad($string, 20, " ", STR_PAD_BOTH);
+                $output .= str_pad($string, 20, " ", STR_PAD_BOTH);
             }
 
-            echo PHP_EOL;
+            $output .= PHP_EOL;
         }
+
+        $output .= PHP_EOL;
+
+        return $output;
+    }
+
+    public static function fromSession(SessionInterface $session): ?Game
+    {
+        if ($session->has('game')) {
+            $game = new Game();
+            $game->setState($session->get('game'));
+
+            return $game;
+        }
+
+        return null;
+
     }
 }

@@ -1,4 +1,7 @@
 - Kept PHPStan level at 5 because of limited time available
-- Run server: php -S localhost:8000
+- Run server: php -S localhost:8000 index.php
 - curl -b cookies.txt http://localhost:8000/move/1/3
 - curl -X POST -b cookies.txt http://localhost:8000/move/1/3
+- make move {from} {to}
+- make new
+- make state
