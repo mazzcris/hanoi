@@ -2,120 +2,151 @@
 
 namespace Hanoi\tests;
 
-use Hanoi\Game;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\Session\Session;
 
-class GameTest extends TestCase
+class GameControllerTest extends TestCase
 {
-    #[Test]
-    #[DataProvider('stateProvider')]
-    public function testCheckWin(array $tower1, array $tower2, array $tower3, bool $isWin): void
-    {
-        $game = new Game();
-        $game->setState(
-            [
-                $tower1,
-                $tower2,
-                $tower3
-            ]
-        );
+    private string $sessionFile = 'cookies.txt';
 
-        $this->assertEquals($isWin, $game->checkWin());
-    }
-
-    static function stateProvider(): array
+    protected function setUp(): void
     {
-        return [
-            [[], [], [1, 2, 3, 4, 5, 6, 7], true],
-            [[], [2, 3], [1, 4, 5, 6, 7], false],
-            [[1], [2], [3, 4, 5, 6, 7], false],
-        ];
+        if (file_exists($this->sessionFile)) {
+            unlink($this->sessionFile);
+        }
     }
 
     #[Test]
-    public function testGetState()
+    public function testNew()
     {
-        $game = new Game();
+        $response = shell_exec("curl -c {$this->sessionFile} http://localhost:8000/new");
 
-        $this->assertEquals([[1, 2, 3, 4, 5, 6, 7], [], []], $game->getState());
-    }
+        $expectedOutput = '
+        ####NEWGAME#####
+        
+         =                   |                   |
+         ==                  |                   |
+        ===                  |                   |
+        ====                 |                   |
+       =====                 |                   |
+       ======                |                   |
+      =======                |                   |
+      
+      ';
 
-    #[Test]
-    public function testSetState()
-    {
-        $game = new Game();
-        $this->assertEquals([[1, 2, 3, 4, 5, 6, 7], [], []], $game->getState());
-
-        $expectedState = [[4, 6, 7], [1, 2, 3], [5]];
-        $game->setState($expectedState);
-        $this->assertEquals($expectedState, $game->getState());
+        $this->assertEquals(str_replace(' ', '', $expectedOutput), str_replace(' ', '', $response));
     }
 
     #[Test]
     public function testMove()
     {
-        $game = new Game();
-        $game->setState([[2, 3], [1, 5, 6], [4, 7]]);
+        $response = shell_exec("curl -c {$this->sessionFile} http://localhost:8000/new");
 
-        $game->move(1, 3);
+        $expectedOutput = '
+        ####NEWGAME#####
+        
+         =                   |                   |
+         ==                  |                   |
+        ===                  |                   |
+        ====                 |                   |
+       =====                 |                   |
+       ======                |                   |
+      =======                |                   |
+      
+      ';
 
-        $this->assertEquals([[3], [1, 5, 6], [2, 4, 7]], $game->getState());
+        $this->assertEquals(str_replace(' ', '', $expectedOutput), str_replace(' ', '', $response));
 
-        $game->move(2, 1);
-        $this->assertEquals([[1, 3], [5, 6], [2, 4, 7]], $game->getState());
+        $response = shell_exec("curl -X POST -b {$this->sessionFile} http://localhost:8000/move/1/2");
+
+        $expectedOutput = '
+         |                   |                   |
+         ==                  |                   |
+        ===                  |                   |
+        ====                 |                   |
+       =====                 |                   |
+       ======                |                   |
+      =======                =                   |
+      
+      ';
+
+        $this->assertEquals(str_replace(' ', '', $expectedOutput), str_replace(' ', '', $response));
     }
 
     #[Test]
-    public function testMoveInvalid()
+    public function testState()
     {
-        $game = new Game();
-        $game->setState([[2, 3], [1, 5, 6], [4, 7]]);
+        $response = shell_exec("curl -c {$this->sessionFile} http://localhost:8000/new");
 
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('Cannot move from tower 3 to tower 1');
+        $expectedOutput = '
+        ####NEWGAME#####
+        
+         =                   |                   |
+         ==                  |                   |
+        ===                  |                   |
+        ====                 |                   |
+       =====                 |                   |
+       ======                |                   |
+      =======                |                   |
+      
+      ';
 
-        $game->move(3, 1);
+        $this->assertEquals(str_replace(' ', '', $expectedOutput), str_replace(' ', '', $response));
+
+        shell_exec("curl -X POST -b {$this->sessionFile} http://localhost:8000/move/1/2");
+        $response = shell_exec("curl -b {$this->sessionFile} http://localhost:8000/state");
+
+        $expectedOutput = '
+         |                   |                   |
+         ==                  |                   |
+        ===                  |                   |
+        ====                 |                   |
+       =====                 |                   |
+       ======                |                   |
+      =======                =                   |
+      
+      ';
+
+        $this->assertEquals(str_replace(' ', '', $expectedOutput), str_replace(' ', '', $response));
     }
 
     #[Test]
-    public function testMoveNoDisksToMove()
+    public function testWin()
     {
-        $game = new Game();
-        $game->setState([[], [1, 2, 3, 4, 5, 6], [7]]);
+        shell_exec("curl -c {$this->sessionFile} http://localhost:8000/demo");
 
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('No discs to move from tower 1');
+        $response = shell_exec("curl -b {$this->sessionFile} http://localhost:8000/state");
 
-        $game->move(1, 3);
-    }
+        $expectedOutput = '
+         |                   |                   |
+         |                   |                   ==
+         |                   |                  ===
+         |                   |                   ====
+         |                   |                  =====
+         |                   |                  ======
+         |                   =                 =======
+      
+      ';
 
-    #[Test]
-    public function testMoveToEmptyTower()
-    {
-        $game = new Game();
-        $game->setState([[2, 3], [1, 4, 5, 6, 7], []]);
+        $this->assertEquals(str_replace(' ', '', $expectedOutput), str_replace(' ', '', $response));
 
-        $game->move(1, 3);
 
-        $this->assertEquals([[3], [1, 4, 5, 6, 7], [2]], $game->getState());
+        $response = shell_exec("curl -X POST -b {$this->sessionFile} http://localhost:8000/move/2/3");
+        $expectedOutput = '        
+         |                   |                    =
+         |                   |                   ==
+         |                   |                  ===
+         |                   |                   ====
+         |                   |                  =====
+         |                   |                  ======
+         |                   |                 =======
+      
+      
+       #####YOUWON#####
+       
+      ';
 
-    }
 
-    #[Test]
-    public function testFromSession()
-    {
-        $game = new Game();
-        $game->setState([[2, 3], [1, 4, 5, 6, 7], []]);
-
-        $session = new Session();
-        $session->set('game', $game->getState());
-
-        $expectedGame = new Game();
-        $expectedGame->setState($session->get('game'));
-
-        $this->assertEquals($expectedGame, Game::fromSession($session));
+        $this->assertEquals(str_replace(' ', '', $expectedOutput), str_replace(' ', '', $response));
     }
 }

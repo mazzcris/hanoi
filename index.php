@@ -4,6 +4,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Hanoi\Controller\GameController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
@@ -15,9 +16,9 @@ use Symfony\Component\HttpFoundation\Response;
 $request = Request::createFromGlobals();
 
 if (!$request->hasSession()) {
-    $session = new \Symfony\Component\HttpFoundation\Session\Session();
+    $session = new Session();
     $session->start();
-    $request->setSession($session); // Set the session in the Request
+    $request->setSession($session);
 } else {
     $session = $request->getSession();
 }
@@ -41,6 +42,12 @@ $routes->add('move', new Route('/move/{from}/{to}', [
         new GameController($session), 'move'
     ],
 ], [], [], '', [], ['POST']));
+
+$routes->add('demo', new Route('/demo', [
+    '_controller' => [
+        new GameController($session), 'demo'
+    ],
+]));
 
 $context = new RequestContext();
 $context->fromRequest($request);

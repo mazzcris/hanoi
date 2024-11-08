@@ -26,6 +26,17 @@ class GameController
         return new Response($responseContent . $game->printTowers());
     }
 
+    public function demo(): Response
+    {
+        $game = new Game();
+        $game->setState([[], [1], [2, 3, 4, 5, 6, 7]]);
+        $this->session->set('game', $game->getState());
+
+        $responseContent = PHP_EOL . '#### NEW GAME #####' . PHP_EOL;
+
+        return new Response($responseContent . $game->printTowers());
+    }
+
     public function state(): Response
     {
         $game = Game::fromSession($this->session);
