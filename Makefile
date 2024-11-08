@@ -11,5 +11,8 @@ state:
 move:
 	curl -X POST -b cookies.txt http://localhost:8000/move/$(word 2,$(MAKECMDGOALS))/$(word 3,$(MAKECMDGOALS))
 
+demo:
+	curl -c cookies.txt http://localhost:8000/demo
+
 %:
 	@:
