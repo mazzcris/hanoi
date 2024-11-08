@@ -98,6 +98,5 @@ class Game
         }
 
         return null;
-
     }
 }

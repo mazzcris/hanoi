@@ -1,14 +1,14 @@
-### Install
+## Install
 ```
 composer install
 ```
 
-### Start the server:
+## Start the server:
 ```
 php -S localhost:8000
 ```
 
-### Run tests and PHPStan
+## Run tests and PHPStan
 (Server must e running for functional tests to succeed)
 ```
 make test

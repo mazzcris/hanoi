@@ -1,6 +1,6 @@
 test:
 	vendor/bin/phpstan analyse -c ./phpstan.neon
-	vendor/bin/phpunit -c ./phpunit.xml --colors --display-phpunit-deprecations $(if $(strip $(filter)),--filter=$(filter),)
+	vendor/bin/phpunit -c ./phpunit.xml --colors $(if $(strip $(filter)),--filter=$(filter),)
 
 new:
 	curl -c cookies.txt http://localhost:8000/new
