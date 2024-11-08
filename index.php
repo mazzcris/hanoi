@@ -15,13 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 $request = Request::createFromGlobals();
 
-if (!$request->hasSession()) {
-    $session = new Session();
-    $session->start();
-    $request->setSession($session);
-} else {
-    $session = $request->getSession();
-}
+$session = $request->hasSession() ? $request->getSession() : new Session();
+$session->start();
+$request->setSession($session);
 
 $routes = new RouteCollection();
 $routes->add('new', new Route('/new', [

@@ -1,3 +1,8 @@
+### Install
+```
+composer install
+```
+
 ### Start the server:
 ```
 php -S localhost:8000
@@ -25,7 +30,7 @@ make state
 ```
 curl -X POST -b cookies.txt http://localhost:8000/move/{from}/{to}
 
-// example moving from tower 1 to tower 2: curl -X POST -b cookies.txt http://localhost:8000/1/2
+// example moving from tower 1 to tower 2: curl -X POST -b cookies.txt http://localhost:8000/move/1/2
 ```
 or
 ```
