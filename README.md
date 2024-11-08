@@ -8,6 +8,12 @@ composer install
 php -S localhost:8000
 ```
 
+### Run tests and PHPStan
+(Server must e running for functional tests to succeed)
+```
+make test
+```
+
 ## New Game
 ```
 curl -c cookies.txt http://localhost:8000/new

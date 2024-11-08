@@ -44,7 +44,6 @@ class Game
 
     public function move(int $from, int $to): void
     {
-
         $towers = $this->getState();
 
         $fromTower = $towers[$from - 1];
